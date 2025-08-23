@@ -1,0 +1,79 @@
+# Переменные окружения и секретные данные
+.env
+.env.local
+.env.production
+.env.staging
+
+# Логи
+*.log
+bot.log
+
+# Python кеш
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Виртуальное окружение
+.venv
+venv/
+env/
+ENV/
+
+# IDE и редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Операционная система
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Временные файлы
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Данные пользователей (если есть локальные БД)
+*.db
+*.sqlite
+*.sqlite3
+
+# Картинки загруженные пользователями
+uploads/
+temp_images/
+
+# Файлы конфигурации локального развертывания
+docker-compose.override.yml
+.docker/
+
+# Тестовые файлы
+test_uploads/
+test_images/
+
+# Документация билда (если генерируется)
+docs/_build/
+
+# Coverage репорты
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# Pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json

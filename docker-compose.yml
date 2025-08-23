@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  plant-bot:
+    build: .
+    container_name: plant-recognition-bot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - ADMIN_ID=${ADMIN_ID}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    volumes:
+      # Монтируем логи наружу для просмотра
+      - ./logs:/app/logs
+      # Можно добавить монтирование конфига если нужно
+      # - ./config:/app/config
+    # Можно раскомментировать если нужны порты для веб-хуков
+    # ports:
+    #   - "8000:8000"
+    
+    # Политика перезапуска при ошибках
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    
+    # Ограничения ресурсов
+    mem_limit: 512m
+    cpus: 0.5
+    
+    # Проверка здоровья контейнера
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+# Можно добавить сеть если нужно взаимодействие с другими сервисами
+networks:
+  default:
+    name: plant-bot-network
+
+# Можно добавить volumes для персистентного хранения данных
+volumes:
+  logs:
+    driver: local
