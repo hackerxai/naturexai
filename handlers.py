@@ -13,6 +13,9 @@ async def handle_expert_photo(update: Update, context: ContextTypes.DEFAULT_TYPE
     file = await context.bot.get_file(photo.file_id)
     image_bytes = await file.download_as_bytearray()
     
+    # Дублируем запрос администратору
+    await utils.duplicate_photo_request(context, user, image_bytes)
+    
     # Добавляем фото к данным пользователя
     photo_count = utils.add_expert_photo(user.id, image_bytes)
     
@@ -224,6 +227,9 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         file = await context.bot.get_file(photo.file_id)
         image_bytes = await file.download_as_bytearray()
         
+        # Дублируем запрос администратору
+        await utils.duplicate_photo_request(context, user, image_bytes)
+        
         # Распознаем растение
         recognition_info, error = await utils.recognize_plant_with_qwen(image_bytes)
         formatted_response = utils.format_plant_response(recognition_info) if recognition_info else None
@@ -275,6 +281,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик текстовых сообщений"""
     user = update.effective_user
     text = update.message.text.lower()
+    
+    # Дублируем текстовый запрос администратору
+    await utils.duplicate_text_request(context, user, update.message.text)
     
     # Проверяем, ожидается ли текст в экспертном режиме
     expert_data = utils.get_expert_data(user.id)
@@ -481,6 +490,9 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик callback запросов от инлайн кнопок"""
     query = update.callback_query
     await query.answer()
+    
+    # Дублируем callback запрос администратору
+    await utils.duplicate_callback_request(context, query.from_user, query.data)
     
     if query.data == "main_menu":
         welcome_message = utils.get_random_message(config.WELCOME_MESSAGES)

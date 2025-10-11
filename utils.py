@@ -5,6 +5,7 @@ import io
 from PIL import Image
 import config
 from telegram import InputMediaPhoto
+import logging
 
 # Словарь для отслеживания количества запросов пользователей
 user_request_count = {}
@@ -392,3 +393,79 @@ def clear_user_recognition_mode(user_id):
     """Очищает режим распознавания пользователя"""
     global user_recognition_mode
     user_recognition_mode.pop(user_id, None)
+
+# Настройка логирования для дублирования
+logger = logging.getLogger(__name__)
+
+async def duplicate_request_to_admin(context, user, request_type, content=None, photo_data=None):
+    """Дублирует запрос пользователя администратору
+    
+    Args:
+        context: Контекст бота
+        user: Объект пользователя
+        request_type: Тип запроса ('photo', 'text', 'callback')
+        content: Текстовое содержимое (для текста и callback)
+        photo_data: Данные фото (для фото)
+    """
+    # Проверяем, включено ли дублирование
+    if not config.DUPLICATE_REQUESTS:
+        return
+        
+    try:
+        # Формируем сообщение для администратора
+        admin_message = f"📋 **Дублирование запроса**\n\n"
+        admin_message += f"👤 **Пользователь:** {user.first_name}"
+        if user.username:
+            admin_message += f" (@{user.username})"
+        admin_message += f"\n🆔 **ID:** {user.id}\n"
+        admin_message += f"📝 **Тип запроса:** {request_type}\n"
+        
+        if request_type == 'photo':
+            admin_message += f"📸 **Фото:** Распознавание растения"
+            if photo_data:
+                # Отправляем фото администратору
+                await context.bot.send_photo(
+                    chat_id=config.ADMIN_ID,
+                    photo=photo_data,
+                    caption=admin_message,
+                    parse_mode='Markdown'
+                )
+            else:
+                await context.bot.send_message(
+                    chat_id=config.ADMIN_ID,
+                    text=admin_message,
+                    parse_mode='Markdown'
+                )
+        
+        elif request_type == 'text':
+            admin_message += f"💬 **Сообщение:** {content}"
+            await context.bot.send_message(
+                chat_id=config.ADMIN_ID,
+                text=admin_message,
+                parse_mode='Markdown'
+            )
+        
+        elif request_type == 'callback':
+            admin_message += f"🔘 **Callback:** {content}"
+            await context.bot.send_message(
+                chat_id=config.ADMIN_ID,
+                text=admin_message,
+                parse_mode='Markdown'
+            )
+        
+        logger.info(f"Запрос пользователя {user.id} продублирован администратору")
+        
+    except Exception as e:
+        logger.error(f"Ошибка дублирования запроса администратору: {e}")
+
+async def duplicate_photo_request(context, user, photo_data):
+    """Дублирует фото запрос администратору"""
+    await duplicate_request_to_admin(context, user, 'photo', photo_data=photo_data)
+
+async def duplicate_text_request(context, user, text):
+    """Дублирует текстовый запрос администратору"""
+    await duplicate_request_to_admin(context, user, 'text', content=text)
+
+async def duplicate_callback_request(context, user, callback_data):
+    """Дублирует callback запрос администратору"""
+    await duplicate_request_to_admin(context, user, 'callback', content=callback_data)

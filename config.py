@@ -9,6 +9,9 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 ADMIN_ID = int(os.getenv('ADMIN_ID', 0))
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')  # Опционально: username администратора для прямых ссылок
 
+# Настройка дублирования запросов администратору
+DUPLICATE_REQUESTS = os.getenv('DUPLICATE_REQUESTS', 'true').lower() == 'true'
+
 # Настройки OpenRouter API
 OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
